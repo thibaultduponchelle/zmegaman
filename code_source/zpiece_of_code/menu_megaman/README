@@ -1,0 +1,6 @@
+Be careful !
+
+This is a code for ti83 regular (notice the .org 9327h) not for ti83plus as zmegaman.
+As I'm priorly a ti83 regular developer, I usually do my experimentations using this assembly language !
+
+This code simply prints the title (see title.asm).

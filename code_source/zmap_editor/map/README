@@ -1,0 +1,9 @@
+This directory contains the zmegaman map editor designed with python and pygtk.
+
+It basically works but it's hard to use if you're not the author (so if you read this README and want to use the map editor, good luck !).
+
+This could be used for other projects probably but it's currently unstable.
+I just done the minimum I needed in fact :)
+
+In zmegaman, we use a RLE compressed data. In our case, compressed map are more than 2 times smaller!
+

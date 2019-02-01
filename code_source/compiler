@@ -1,0 +1,9 @@
+#!/bin/bash
+spasm megaMan.asm ZMEGAMAN.8xp -A -T
+spasm megaLevels.asm ZMEGADAT.8xp -T
+sleep 1
+python archive.py
+#cp AZMEGAMAN.8xp ZMEGAMAN.8xp
+#cp AZMEGADAT.8xp ZMEGADAT.8xp
+
+tilem2 ZMEGAMAN.8xp ZMEGADAT.8xp

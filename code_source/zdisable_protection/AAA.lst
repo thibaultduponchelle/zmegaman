@@ -1,0 +1,155 @@
+1    00000: -  -  -  -  
+2    00000: -  -  -  -  #include "ti83plus.inc"
+3    00000: -  -  -  -  #include "ion.inc"
+1    00000: -  -  -  -  ; The Ion Include File by Dan Englender
+2    00000: -  -  -  -  ; Altered James Montelongo to be used with ti83plus.inc
+3    00000: -  -  -  -  ; ti's inc is more complete
+4    00000: -  -  -  -  
+5    00000: -  -  -  -  ;----> Safe Memory Areas
+6    00000: -  -  -  -  ; saferam1 = 768 bytes (apdram)
+7    00000: -  -  -  -  ; saferam2 = 531 bytes (statram)
+8    00000: -  -  -  -  ; saferam3 = 128 bytes (textmem)
+9    00000: -  -  -  -  ; saferam4 = 66 bytes (ops)
+10   00000: -  -  -  -  ; saferam5 = 10 bytes (imathptrs)
+11   00000: -  -  -  -  
+12   00000: -  -  -  -  #define bcall(xxxx)	rst 28h \ .dw xxxx
+13   00000: -  -  -  -  
+14   00000: -  -  -  -  #define	bcallz(xxxx)	jr nz,$+5 \ rst 28h \ .dw xxxx
+15   00000: -  -  -  -  #define	bcallnz(xxxx)	jr	z,$+5 \ rst 28h \ .dw xxxx
+16   00000: -  -  -  -  #define	bcallc(xxxx)	jr	nc,$+5 \ rst 28h \ .dw xxxx
+17   00000: -  -  -  -  #define	bcallnc(xxxx)	jr	c,$+5	\ rst 28h \ .dw xxxx
+18   00000: -  -  -  -  #define bjump(xxxx)	call 50h \ .dw xxxx
+19   00000: -  -  -  -   .addinstr B_CALL *       EF   3 NOP 1
+20   00000: -  -  -  -  
+21   00000: -  -  -  -  ;Not defined in ti83plus.inc
+22   00000: -  -  -  -  libstart		=$0004
+23   00000: -  -  -  -  cmdshad		=$966E
+24   00000: -  -  -  -  progstart		=$9D95
+25   00000: -  -  -  -  saferam1		=$86EC	;saveSScreen=768
+26   00000: -  -  -  -  saferam2		=$8A3A	;statVars=531
+27   00000: -  -  -  -  saferam3		=$8508	;textShadow=128
+28   00000: -  -  -  -  saferam4		=$8478	;OPs=66
+29   00000: -  -  -  -  saferam5		=$84D3	;iMathPtrs=10
+30   00000: -  -  -  -  saferamp		=$9872	;appBackUpScreen=768
+31   00000: -  -  -  -  saferamp2		=$8251	;bootTemp=52
+32   00000: -  -  -  -  gbuf			=$9340
+33   00000: -  -  -  -  grbuf			=$9340
+34   00000: -  -  -  -  graph_mem		=$9340
+35   00000: -  -  -  -  _copygbuf		=$486A
+36   00000: -  -  -  -  _cleargbuf		=$4BD0
+37   00000: -  -  -  -  _clrlcdf		=$4540
+38   00000: -  -  -  -  _clrscrf		=$4546
+39   00000: -  -  -  -  _chksysvar		=$42F1
+40   00000: -  -  -  -  sram			=saferam1
+41   00000: -  -  -  -  apd_buf		=saferam1
+42   00000: -  -  -  -  apdbuf		=saferam1
+43   00000: -  -  -  -  apdram		=saferam1
+44   00000: -  -  -  -  statram		=saferam2
+45   00000: -  -  -  -  statvar		=saferam2
+46   00000: -  -  -  -  text_mem		=saferam3
+47   00000: -  -  -  -  textmem		=saferam3
+48   00000: -  -  -  -  ;-----> Ion Functions
+49   00000: -  -  -  -  lVectors		=cmdshad+80
+50   00000: -  -  -  -  ionVersion		=lVectors
+51   00000: -  -  -  -  ionRandom		=lVectors+3
+52   00000: -  -  -  -  ionPutSprite	=lVectors+6
+53   00000: -  -  -  -  ionLargeSprite	=lVectors+9
+54   00000: -  -  -  -  ionGetPixel		=lVectors+12
+55   00000: -  -  -  -  ionFastCopy		=lVectors+15
+56   00000: -  -  -  -  ionDetect		=lVectors+18
+57   00000: -  -  -  -  ionDecompress	=lVectors+21
+58   00000: -  -  -  -  
+59   00000: -  -  -  -  fastcopy =ionFastCopy
+60   00000: -  -  -  -  
+61   00000: -  -  -  -  
+62   00000: -  -  -  -  
+4    00000: -  -  -  -  _NZIf83Plus   = $50E0
+5    00000: -  -  -  -  
+6    00000: -  -  -  -  .org progstart - 2
+7    09D93: BB 6D -  -  .db t2ByteTok, tasmCmp
+8    09D95: -  -  -  -  
+9    09D95: CD A2 9D -      call disable_c000_protection    
+10   09D98: C9 -  -  -      ret
+11   09D99: 21 00 C0 -      ld hl, $C000
+12   09D9C: 3E C9 -  -      ld a, $C9
+13   09D9E: 77 -  -  -      ld (hl), a
+14   09D9F: C3 00 C0 -      jp $C000
+15   09DA2: -  -  -  -  
+16   09DA2: -  -  -  -  #include "hack.asm"
+1    09DA2: -  -  -  -  ; Credit to Brian Coventry for this code
+2    09DA2: -  -  -  -  ; Pour le moment, je n'arrive pas à l'utiliser correctement
+3    09DA2: -  -  -  -  ; Car lorsqu'on sort du launcher, la calc est plantee...
+4    09DA2: -  -  -  -  ; Mais c'est surement du a autre chose
+5    09DA2: -  -  -  -  ;this disables TI's protection
+6    09DA2: -  -  -  -  
+7    09DA2: -  -  -  -  
+8    09DA2: -  -  -  -  
+9    09DA2: -  -  -  -  ;this disables TI's protection
+10   09DA2: -  -  -  -  disable_c000_protection:
+11   09DA2: CD B8 9D -      call unlockFlash
+12   09DA5: AF -  -  -      xor a
+13   09DA6: D3 25 -  -      out ($25), a
+14   09DA8: 3D -  -  -      dec a
+15   09DA9: D3 26 -  -      out ($26), a
+16   09DAB: C9 -  -  -      ret
+17   09DAC: -  -  -  -  
+18   09DAC: -  -  -  -  ;this enables TI's protection
+19   09DAC: -  -  -  -  
+20   09DAC: -  -  -  -  enable_c000_protection:
+21   09DAC: CD B8 9D -      call unlockFlash
+22   09DAF: 3E 10 -  -      ld a, $10
+23   09DB1: D3 25 -  -      out ($25), a
+24   09DB3: 3E 20 -  -      ld a, $20
+25   09DB5: D3 26 -  -      out ($26), a
+26   09DB7: C9 -  -  -      ret
+27   09DB8: -  -  -  -  
+28   09DB8: -  -  -  -  
+29   09DB8: -  -  -  -  unlockFlash:
+30   09DB8: -  -  -  -  ;Unlocks Flash protection.
+31   09DB8: -  -  -  -  ;Destroys: pagedCount                        
+32   09DB8: -  -  -  -  ;          pagedGetPtr
+33   09DB8: -  -  -  -  ;          arcInfo
+34   09DB8: -  -  -  -  ;          iMathPtr5
+35   09DB8: -  -  -  -  ;          pagedBuf
+36   09DB8: -  -  -  -  ;          ramCode
+37   09DB8: -  -  -  -  
+38   09DB8: F3 -  -  -      di
+39   09DB9: DB 06 -  -      in      a, (06)
+40   09DBB: F5 -  -  -      push    af
+41   09DBC: -  -  -  -  
+42   09DBC: 21 1C 9E -      ld      hl, returnPoint+$8214-$81E3
+43   09DBF: 11 14 82 -      ld      de, $8214
+44   09DC2: 7B -  -  -      ld      a, e
+45   09DC3: 32 EE 83 -      ld      (arcInfo), a            ;should be 08-15
+46   09DC6: 32 34 98 -      ld      (pagedCount), a         ;just has to be over 2
+47   09DC9: 01 AD 00 -      ld      bc, $8214-$8167
+48   09DCC: ED B8 -  -      lddr
+49   09DCE: ED 53 DB 84     ld      (iMathPtr5), de         ;must be 8167
+50   09DD2: FD 21 31 00     ld      iy, 0056h-25h           ;permanent flags
+51   09DD6: -  -  -  -  
+52   09DD6: 83 -  -  -      add     a, e
+53   09DD7: 32 3A 98 -      ld      (pagedBuf), a           ;needs to be large, but under 80
+54   09DDA: CD F9 9D -      call    translatePage
+55   09DDD: 2A 92 50 -      ld      hl, ($5092)
+56   09DE0: 3A 94 50 -      ld      a, ($5094)
+57   09DE3: CD F9 9D -      call    translatePage
+58   09DE6: 3E 10 -  -      ld      a, $10
+59   09DE8: ED B1 -  -      cpir
+60   09DEA: E9 -  -  -      jp      (hl)
+61   09DEB: -  -  -  -  
+62   09DEB: -  -  -  -  returnPoint:
+63   09DEB: 21 18 00 -      ld      hl, $0018
+64   09DEE: 36 C3 -  -      ld      (hl), $C3               ;dummy write
+65   09DF0: -  -  -  -  flashWait:
+66   09DF0: FD 21 F0 89     ld      iy, flags
+67   09DF4: 10 FA -  -      djnz    flashWait               ;wait for write to finish
+68   09DF6: 39 -  -  -      add     hl, sp
+69   09DF7: F9 -  -  -      ld      sp, hl
+70   09DF8: F1 -  -  -      pop     af
+71   09DF9: -  -  -  -  translatePage:
+72   09DF9: EF E0 50 -      bcall(_NZIf83Plus)
+73   09DFC: 28 02 -  -      jr      z, not83
+74   09DFE: E6 1F -  -      and     1Fh
+75   09E00: -  -  -  -  not83:
+76   09E00: D3 06 -  -      out     (06), a
+77   09E02: C9 -  -  -      ret

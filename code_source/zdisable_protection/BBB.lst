@@ -1,0 +1,151 @@
+1    00000: -  -  -  -  ; Credit to brian coventry !
+2    00000: -  -  -  -  
+3    00000: -  -  -  -  
+4    00000: -  -  -  -  #include "ti83plus.inc"
+5    00000: -  -  -  -  #include "ion.inc"
+1    00000: -  -  -  -  ; The Ion Include File by Dan Englender
+2    00000: -  -  -  -  ; Altered James Montelongo to be used with ti83plus.inc
+3    00000: -  -  -  -  ; ti's inc is more complete
+4    00000: -  -  -  -  
+5    00000: -  -  -  -  ;----> Safe Memory Areas
+6    00000: -  -  -  -  ; saferam1 = 768 bytes (apdram)
+7    00000: -  -  -  -  ; saferam2 = 531 bytes (statram)
+8    00000: -  -  -  -  ; saferam3 = 128 bytes (textmem)
+9    00000: -  -  -  -  ; saferam4 = 66 bytes (ops)
+10   00000: -  -  -  -  ; saferam5 = 10 bytes (imathptrs)
+11   00000: -  -  -  -  
+12   00000: -  -  -  -  #define bcall(xxxx)	rst 28h \ .dw xxxx
+13   00000: -  -  -  -  
+14   00000: -  -  -  -  #define	bcallz(xxxx)	jr nz,$+5 \ rst 28h \ .dw xxxx
+15   00000: -  -  -  -  #define	bcallnz(xxxx)	jr	z,$+5 \ rst 28h \ .dw xxxx
+16   00000: -  -  -  -  #define	bcallc(xxxx)	jr	nc,$+5 \ rst 28h \ .dw xxxx
+17   00000: -  -  -  -  #define	bcallnc(xxxx)	jr	c,$+5	\ rst 28h \ .dw xxxx
+18   00000: -  -  -  -  #define bjump(xxxx)	call 50h \ .dw xxxx
+19   00000: -  -  -  -   .addinstr B_CALL *       EF   3 NOP 1
+20   00000: -  -  -  -  
+21   00000: -  -  -  -  ;Not defined in ti83plus.inc
+22   00000: -  -  -  -  libstart		=$0004
+23   00000: -  -  -  -  cmdshad		=$966E
+24   00000: -  -  -  -  progstart		=$9D95
+25   00000: -  -  -  -  saferam1		=$86EC	;saveSScreen=768
+26   00000: -  -  -  -  saferam2		=$8A3A	;statVars=531
+27   00000: -  -  -  -  saferam3		=$8508	;textShadow=128
+28   00000: -  -  -  -  saferam4		=$8478	;OPs=66
+29   00000: -  -  -  -  saferam5		=$84D3	;iMathPtrs=10
+30   00000: -  -  -  -  saferamp		=$9872	;appBackUpScreen=768
+31   00000: -  -  -  -  saferamp2		=$8251	;bootTemp=52
+32   00000: -  -  -  -  gbuf			=$9340
+33   00000: -  -  -  -  grbuf			=$9340
+34   00000: -  -  -  -  graph_mem		=$9340
+35   00000: -  -  -  -  _copygbuf		=$486A
+36   00000: -  -  -  -  _cleargbuf		=$4BD0
+37   00000: -  -  -  -  _clrlcdf		=$4540
+38   00000: -  -  -  -  _clrscrf		=$4546
+39   00000: -  -  -  -  _chksysvar		=$42F1
+40   00000: -  -  -  -  sram			=saferam1
+41   00000: -  -  -  -  apd_buf		=saferam1
+42   00000: -  -  -  -  apdbuf		=saferam1
+43   00000: -  -  -  -  apdram		=saferam1
+44   00000: -  -  -  -  statram		=saferam2
+45   00000: -  -  -  -  statvar		=saferam2
+46   00000: -  -  -  -  text_mem		=saferam3
+47   00000: -  -  -  -  textmem		=saferam3
+48   00000: -  -  -  -  ;-----> Ion Functions
+49   00000: -  -  -  -  lVectors		=cmdshad+80
+50   00000: -  -  -  -  ionVersion		=lVectors
+51   00000: -  -  -  -  ionRandom		=lVectors+3
+52   00000: -  -  -  -  ionPutSprite	=lVectors+6
+53   00000: -  -  -  -  ionLargeSprite	=lVectors+9
+54   00000: -  -  -  -  ionGetPixel		=lVectors+12
+55   00000: -  -  -  -  ionFastCopy		=lVectors+15
+56   00000: -  -  -  -  ionDetect		=lVectors+18
+57   00000: -  -  -  -  ionDecompress	=lVectors+21
+58   00000: -  -  -  -  
+59   00000: -  -  -  -  fastcopy =ionFastCopy
+60   00000: -  -  -  -  
+61   00000: -  -  -  -  
+62   00000: -  -  -  -  
+6    00000: -  -  -  -  
+7    00000: -  -  -  -  #define b_(bit)   bit&7
+8    00000: -  -  -  -  #define f_(flag)  flag/$10
+9    00000: -  -  -  -  
+10   00000: -  -  -  -  #define bit_(flag)  bit b_(flag), (ix + f_(flag))
+11   00000: -  -  -  -  #define set_(flag)  set b_(flag), (ix + f_(flag))
+12   00000: -  -  -  -  #define res_(flag)  res b_(flag), (ix + f_(flag))
+13   00000: -  -  -  -  
+14   00000: -  -  -  -  #macro toggle_(flag)  
+15   00000:               ld  a, (ix + f_(flag))  
+16   00000:               xor   1 << b_(flag)
+17   00000:               ld  (ix + f_(flag)), a
+18   00000:             #endmacro
+19   00000: -  -  -  -  
+20   00000: -  -  -  -  
+21   00000: -  -  -  -  
+22   00000: -  -  -  -  avFlagSize    equ 2
+23   00000: -  -  -  -  
+24   00000: -  -  -  -  avContrast    equ avFlagSize+1  ;1
+25   00000: -  -  -  -  avDelay     equ avContrast+1  ;1
+26   00000: -  -  -  -  avOmniData    equ avDelay+1 ;3
+27   00000: -  -  -  -  avPicName   equ avOmniData+3  ;7
+28   00000: -  -  -  -  avFontName    equ avPicName+7 ;7
+29   00000: -  -  -  -  avShell     equ avFontName+7  ;6
+30   00000: -  -  -  -  avRCProg    equ avShell+6 ;7
+31   00000: -  -  -  -  avOnProg    equ avRCProg+7  ;7
+32   00000: -  -  -  -  avHotKeys   equ avOnProg+7  ;63
+33   00000: -  -  -  -  avAxeMode   equ avHotKeys+63  ;1
+34   00000: -  -  -  -  avPicContrast   equ avAxeMode+1 ;1
+35   00000: -  -  -  -  avRefresh   equ avPicContrast+1 ;1
+36   00000: -  -  -  -  avZStartProg    equ avRefresh+1 ;7
+37   00000: -  -  -  -  avParserName    equ avZStartProg+7  ;6
+38   00000: -  -  -  -  avParserOffset    equ avParserName+6  ;2
+39   00000: -  -  -  -  
+40   00000: -  -  -  -  avSize      equ avParserOffset+2
+41   00000: -  -  -  -  
+42   00000: -  -  -  -  selected  equ appBackUpScreen ;1
+43   00000: -  -  -  -  leftMask  equ selected+1  ;1
+44   00000: -  -  -  -  rightMask equ leftMask+1  ;1
+45   00000: -  -  -  -  swapSectorPage  equ rightMask+1 ;1
+46   00000: -  -  -  -  pageA   equ swapSectorPage+1;1
+47   00000: -  -  -  -  pageB   equ pageA+1   ;1
+48   00000: -  -  -  -  saveA   equ pageB+1   ;1
+49   00000: -  -  -  -  saveHL    equ saveA+1   ;2
+50   00000: -  -  -  -  erase   equ saveHL+2  ;1
+51   00000: -  -  -  -  itemsFound  equ erase+1   ;1
+52   00000: -  -  -  -  scrolled  equ itemsFound+1  ;1
+53   00000: -  -  -  -  buttonPressed equ scrolled+1  ;1
+54   00000: -  -  -  -  tempBuf   equ buttonPressed+1 ;8
+55   00000: -  -  -  -  tagPtr    equ tempBuf+8 ;2
+56   00000: -  -  -  -  tempBuf2  equ tagPtr+2  ;8
+57   00000: -  -  -  -  saveDE    equ tempBuf2+8  ;2
+58   00000: -  -  -  -  tempPage  equ saveDE+2  ;1
+59   00000: -  -  -  -  tempAddr  equ tempPage+1  ;2
+60   00000: -  -  -  -  tempGood  equ tempAddr+2  ;1
+61   00000: -  -  -  -  cursX   equ tempGood+1  ;1
+62   00000: -  -  -  -  cursY   equ cursX+1   ;1   
+63   00000: -  -  -  -  increment equ cursY+1   ;2   
+64   00000: -  -  -  -  saveSP    equ increment+2 ;2
+65   00000: -  -  -  -  contrastSave  equ saveSP+2  ;1
+66   00000: -  -  -  -  realShadow  equ contrastSave+1  ;2
+67   00000: -  -  -  -  avShadow  equ realShadow+2  ;avSize
+68   00000: -  -  -  -  avDirty   equ avShadow+avSize ;1
+69   00000: -  -  -  -  refresh   equ avDirty+1 ;1
+70   00000: -  -  -  -  menuId    equ refresh+1 ;1
+71   00000: -  -  -  -  avbParser    equ $26
+72   00000: -  -  -  -  
+73   00000: -  -  -  -  .org progstart - 2 
+74   09D93: BB 6D -  -  .db t2ByteTok, tasmCmp
+75   09D95: -  -  -  -  
+76   09D95: -  -  -  -  ;toggleParserHook:
+77   09D95: DD 7E 02 EE 
+            40 DD 77 02   toggle_(avbParser)
+78   09D9D: DD CB 02 76   bit_(avbParser)
+79   09DA1: -  -  -  -    ;jr  nz, makeAvDirty
+80   09DA1: AF -  -  -    xor a
+81   09DA2: 32 13 99 -    ld  (avShadow+avParserName), a
+82   09DA5: C9 -  -  -    ret
+83   09DA6: -  -  -  -  
+84   09DA6: -  -  -  -  makeAvDirty:
+85   09DA6: 3E 01 -  -    ld  a, 1
+86   09DA8: 32 1B 99 -    ld  (avDirty), a
+87   09DAB: C9 -  -  -    ret
+88   09DAC: -  -  -  -  
